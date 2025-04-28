@@ -1,13 +1,15 @@
 FROM python:3.9
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /action/workspace
 
 # Copy the files to the container
-COPY . .
+COPY . /action/workspace
 
 # Install any dependencies
-RUN pip install -r requirements.txt
-
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+ 
 # Set the command for the container to run
-CMD ["python", "main.py"]
+CMD ["/action/workspace/main.py"]
+
+ENTRYPOINT ["python3", "-u"]
