@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Teams Notification
-        uses: ./ # Path to the action
+        uses: nikhilesh-sdie/gitFlowNotifier@main # Path to the action
         with:
           webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
           token: ${{ secrets.gitToken }}
