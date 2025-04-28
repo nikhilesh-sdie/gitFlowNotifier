@@ -1,5 +1,5 @@
 import os
-import pyadaptivecard
+import pyadaptivecards
 from github import Github, Auth
 from typing import List, Dict
 
@@ -131,7 +131,7 @@ class NotificationCard:
         self.repo_name = os.getenv("GITHUB_REPOSITORY").split('/')[-1]
 
     def send_notification(self, result_status, job_details):
-        card = pyadaptivecard.AdaptiveCard(self.webhook_url)
+        card = pyadaptivecards.AdaptiveCard(self.webhook_url)
         card.title(f"Realtime Release: {self.release_tag}")
 
         card.addSection(self._create_title_section(result_status))
@@ -146,14 +146,14 @@ class NotificationCard:
         return card
 
     def _create_title_section(self, result_status):
-        section = pyadaptivecard.ActivitySection()
+        section = pyadaptivecards.ActivitySection()
         section.activityTitle(f"Release Tag: {self.release_tag}")
         section.activitySubtitle(result_status["status"]["activitySubtitle"])
         section.activityImage(result_status["status"]["activityImage"])
         return section
 
     def _create_project_status_section(self, result_status):
-        section = pyadaptivecard.CardSection()
+        section = pyadaptivecards.CardSection()
         section.addFact("Project", f"[{self.repo_name}]({self.repo_url})")
         section.addFact(
             "Status",
@@ -164,13 +164,13 @@ class NotificationCard:
 
     def _create_release_notes_section(self):
         release_notes = open(f"{self.note_path}").read() or "No release note found"
-        section = pyadaptivecard.CardSection()
+        section = pyadaptivecards.CardSection()
         section.title("Release Notes")
         section.text(release_notes)
         return section
 
     def _create_button_section(self, deployment_logs_url):
-        section = pyadaptivecard.CardSection()
+        section = pyadaptivecards.CardSection()
         section.addLinkButton("Deployment Logs", deployment_logs_url)
         return section
 
