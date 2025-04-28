@@ -11,15 +11,14 @@ class GitHubWorkflow:
         self.run_id = os.getenv("GITHUB_RUN_ID")
         self.sha = os.getenv("GITHUB_SHA")
         self.workflow = {}
-        self.github = self.authenticate()
 
     def authenticate(self):
         access_token = Auth.Token(str(self.git_token))
         return Github(auth=access_token)
 
     def fetch_repository(self):
-        print(f"{self.owner}/{self.repo_name}")
-        return self.github.get_repo(f"{self.owner}/{self.repo_name}")
+        github = self.authenticate()
+        return github.get_repo(f"{self.owner}/{self.repo_name}")
 
     def fetch_workflow_details(self):
         repo = self.fetch_repository()
