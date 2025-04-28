@@ -5,16 +5,16 @@ from typing import List, Dict
 
 class GitHubWorkflow:
     def __init__(self):
-        self.git_token = os.getenv({token})
-        self.owner = os.getenv({GITHUB_REPOSITORY}).split('/')[0]
-        self.repo_name = os.getenv({GITHUB_REPOSITORY}).split('/')[-1]
-        self.run_id = os.getenv({GITHUB_RUN_ID})
-        self.sha = os.getenv({GITHUB_SHA})
+        self.git_token = os.getenv("token")
+        self.owner = os.getenv("GITHUB_REPOSITORY").split('/')[0]
+        self.repo_name = os.getenv("GITHUB_REPOSITORY").split('/')[-1]
+        self.run_id = os.getenv("GITHUB_RUN_ID")
+        self.sha = os.getenv("GITHUB_SHA")
         self.workflow = {}
         self.github = self.authenticate()
 
     def authenticate(self):
-        access_token = Auth.Token(self.git_token)
+        access_token = Auth.Token(str(self.git_token))
         return Github(auth=access_token)
 
     def fetch_repository(self):
