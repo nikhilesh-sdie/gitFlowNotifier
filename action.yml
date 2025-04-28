@@ -14,6 +14,3 @@ inputs:
 runs:
   using: "docker"
   image: "Dockerfile"
-  args:
-    - webhook_url: ${{ inputs.webhook_url }}
-    - token: ${{ inputs.token }}
