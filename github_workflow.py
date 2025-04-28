@@ -18,6 +18,7 @@ class GitHubWorkflow:
         return Github(auth=access_token)
 
     def fetch_repository(self):
+        print(f"{self.owner}/{self.repo_name}")
         return self.github.get_repo(f"{self.owner}/{self.repo_name}")
 
     def fetch_workflow_details(self):
