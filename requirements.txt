@@ -1,0 +1,2 @@
+PyGithub==2.6.1
+pyadaptivecards==0.1.1
