@@ -37,8 +37,11 @@ jobs:
         uses: nikhilesh-sdie/gitFlowNotifier@main # Path to the action
         with:
           webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
-          token: ${{ secrets.gitToken }}
           dry_run: true
+        env:
+          token: ${{ github.token }}
+
+
 ```
 
 ---
@@ -46,14 +49,13 @@ jobs:
 | Input | Description | Required | Default Value | 
 | ----- | ----------- | -------- | ------------- |
 | webhook_url | Teams incoming webhook url. | Yes | None | 
-| token | Github access token. | Yes | None | 
 | dry_run | Do not actually send the message. | No | false |  
 
 ---
 ## Local Development & Testing
 ### Run Locally
 To test this action locally:
-- Install dependencies: ```pip install requests```
+- Install dependencies: ```pip install -r requirements.txt```
 
 - Run the script:```python main.py --webhook-url <your_webhook_url> --token <your_git_token> dry_run <true/false> ```
 
