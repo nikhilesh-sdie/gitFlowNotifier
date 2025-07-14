@@ -5,7 +5,8 @@ from typing import List, Dict
 
 class GitHubWorkflow:
     def __init__(self):
-        self.git_token = os.getenv("token")
+        #self.git_token = os.getenv("token")
+        self.git_token = os.getenv("token", "").strip()
         self.owner = os.getenv("GITHUB_REPOSITORY").split('/')[0]
         self.repo_name = os.getenv("GITHUB_REPOSITORY").split('/')[-1]
         self.run_id = os.getenv("GITHUB_RUN_ID")
@@ -71,7 +72,7 @@ class GitHubWorkflow:
         repo = self.fetch_repository()
         self.workflow["work"] = repo.get_workflow_run(int(self.run_id))
         self.workflow["sha"] = repo.get_commit(self.sha)
-        self.workflow["status"] = self.get_status(self.all_success)
+        self.workflow["status"] = self.get_status("success")
         print(self.workflow)
 
 
@@ -89,10 +90,21 @@ class NotificationCard:
         self.note_path = os.getenv("realease_note_path", "Release-Notes.txt")
         self.repo_url = f"https://github.com/{os.getenv('GITHUB_REPOSITORY')}/tree/{self.release_tag.split('/')[-1]}"
         self.repo_name = os.getenv("GITHUB_REPOSITORY").split('/')[-1]
+        self.mobile_os = os.getenv("mobile_os")
+        self.version_name = os.getenv("version_name")
+        self.version_code = os.getenv("version_code")
+        self.play_console_url = os.getenv("play_console_url")
+        self.testflight_url = os.getenv("testflight_url")
+        self.mode = "api" if self.repo_name == "checkpoint-api" else "mobile" if self.repo_name == "checkpoint-mobile-app" else None
 
     def send_notification(self, result_status):
         card = pyadaptivecard.AdaptiveCard(self.webhook_url)
-        card.title(f"Realtime Release: {self.release_tag}")
+        title_text = (
+            f"Realtime Release: {self.release_tag}" if self.mode == "api"
+            else f"Realtime {self.mobile_os} release" if self.mode == "mobile"
+            else "Unknown release mode"
+        )
+        card.title(f"{title_text}")
 
         card.addSection(self._create_title_section(result_status))
         card.addSection(self._create_project_status_section(result_status))
@@ -101,13 +113,19 @@ class NotificationCard:
         if result_status["status"]["id"] == "success":
             card.addSection(self._create_release_notes_section())
 
-        card.addSection(self._create_button_section(result_status["work"].html_url))
+        url = result_status["work"].html_url if self.mode == "api" else self.play_console_url if self.mobile_os.lower() == "android" else self.testflight_url
+        card.addSection(self._create_button_section(url))
 
         return card
 
     def _create_title_section(self, result_status):
         section = pyadaptivecard.ActivitySection()
-        section.activityTitle(f"Release Tag: {self.release_tag}")
+        title_text = (
+            f"Release Tag: {self.release_tag}" if self.mode == "api" 
+            else f"Release version: {self.version_name}({self.version_code})" if self.mode == "mobile"
+            else "Unknown release code"
+        )    
+        section.activityTitle(f"{title_text}")
         section.activitySubtitle(result_status["status"]["activitySubtitle"])
         section.activityImage(result_status["status"]["activityImage"])
         return section
@@ -136,7 +154,13 @@ class NotificationCard:
 
     def _create_button_section(self, deployment_logs_url):
         section = pyadaptivecard.CardSection()
-        section.addLinkButton("Deployment Logs", deployment_logs_url)
+        section.addLinkButton(
+            "Deployment Logs" if self.mode == "api" else
+            "Google Play console" if self.mode == "mobile" and self.mobile_os.lower() == "android" else
+            "Testflight" if self.mode == "mobile" and self.mobile_os.lower() == "ios" else
+            None,
+            deployment_logs_url
+        )
         return section
 
 
