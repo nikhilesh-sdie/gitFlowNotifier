@@ -5,7 +5,6 @@ from typing import List, Dict
 
 class GitHubWorkflow:
     def __init__(self):
-        #self.git_token = os.getenv("token")
         self.git_token = os.getenv("token", "").strip()
         self.owner = os.getenv("GITHUB_REPOSITORY").split('/')[0]
         self.repo_name = os.getenv("GITHUB_REPOSITORY").split('/')[-1]
@@ -72,7 +71,7 @@ class GitHubWorkflow:
         repo = self.fetch_repository()
         self.workflow["work"] = repo.get_workflow_run(int(self.run_id))
         self.workflow["sha"] = repo.get_commit(self.sha)
-        self.workflow["status"] = self.get_status("success")
+        self.workflow["status"] = self.get_status(self.all_success)
         print(self.workflow)
 
 
