@@ -135,7 +135,7 @@ class NotificationCard:
         section.addFact("Project", f"[{self.repo_name}]({self.repo_url})")
         section.addFact(
             "Status",
-            f"{result_status['work'].conclusion} {result_status['status']['icon']}",
+            f"{self.all_success} {result_status['status']['icon']}",
             result_status["status"]["colour"]
         )
         return section
