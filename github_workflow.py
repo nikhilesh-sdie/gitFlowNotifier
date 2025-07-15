@@ -84,6 +84,7 @@ class GitHubWorkflow:
 
 class NotificationCard:
     def __init__(self):
+        self.all_success = os.getenv("job_status", "unknown")
         self.webhook_url = os.getenv("MS_TEAMS_WEBHOOK_URL")
         self.release_tag = os.getenv("GITHUB_REF")
         self.rootPath = os.getenv("GITHUB_WORKSPACE")
@@ -135,7 +136,7 @@ class NotificationCard:
         section.addFact("Project", f"[{self.repo_name}]({self.repo_url})")
         section.addFact(
             "Status",
-            f"{os.getenv("job_status")} {result_status['status']['icon']}",
+            f"{self.all_success} {result_status['status']['icon']}",
             result_status["status"]["colour"]
         )
         return section
