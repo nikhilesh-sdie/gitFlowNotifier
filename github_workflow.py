@@ -72,6 +72,7 @@ class GitHubWorkflow:
         self.workflow["work"] = repo.get_workflow_run(int(self.run_id))
         self.workflow["sha"] = repo.get_commit(self.sha)
         self.workflow["status"] = self.get_status(self.all_success)
+        print(self.all_success)
         print(self.workflow)
 
 
