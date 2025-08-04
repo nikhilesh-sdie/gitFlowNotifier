@@ -19,7 +19,7 @@ class GitHubWorkflow:
         utc_time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S%z')
         ist_timezone = pytz.timezone("Asia/Kolkata")
         ist_time = utc_time.astimezone(ist_timezone)
-        formatted_ist_time = ist_time.strftime("%Y-%m-%d %H:%M:%S") + " IST"
+        formatted_ist_time = ist_time.strftime("%Y-%m-%d %I:%M:%S %p") + " IST"
         return formatted_ist_time
 
     def get_status(self, conclusion):
