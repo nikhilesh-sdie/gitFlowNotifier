@@ -1,3 +1,4 @@
 PyGithub==2.6.1
 pyadaptivecards==0.1.
 PyMsTeamsAdaptiveCard==0.2.0
+pytz
