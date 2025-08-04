@@ -2,6 +2,8 @@ import os
 import pyadaptivecard
 from github import Github, Auth
 from typing import List, Dict
+import pytz
+from datetime import datetime
 
 class GitHubWorkflow:
     def __init__(self):
@@ -13,13 +15,20 @@ class GitHubWorkflow:
         self.workflow = {}
         self.all_success = os.getenv("job_status", "unknown")
 
+    def convert_to_ist(self, time):
+        utc_time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S%z')
+        ist_timezone = pytz.timezone("Asia/Kolkata")
+        ist_time = utc_time.astimezone(ist_timezone)
+        formatted_ist_time = ist_time.strftime("%Y-%m-%d %H:%M:%S") + " IST"
+        return formatted_ist_time
+
     def get_status(self, conclusion):
         statuses = [
             {
                 "id": "success",
                 "icon": "✓",
                 "activityTitle": "Success!",
-                "activitySubtitle": str(self.workflow["sha"].commit.author.date),
+                "activitySubtitle": self.convert_to_ist(str(self.workflow["sha"].commit.author.date)),
                 "activityImage": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/success.png",
                 "colour": "Good"
             },
@@ -27,7 +36,7 @@ class GitHubWorkflow:
                 "id": "failure",
                 "icon": "✗",
                 "activityTitle": "Failure",
-                "activitySubtitle": str(self.workflow["sha"].commit.author.date),
+                "activitySubtitle": self.convert_to_ist(str(self.workflow["sha"].commit.author.date)),
                 "activityImage": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/failure.png",
                 "colour": "Attention"
             },
@@ -35,7 +44,7 @@ class GitHubWorkflow:
                 "id": "cancelled",
                 "icon": "o",
                 "activityTitle": "Cancelled",
-                "activitySubtitle": str(self.workflow["sha"].commit.author.date),
+                "activitySubtitle": self.convert_to_ist(str(self.workflow["sha"].commit.author.date)),
                 "activityImage": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/cancelled.png",
                 "colour": "Default"
             },
@@ -43,7 +52,7 @@ class GitHubWorkflow:
                 "id": "skipped",
                 "icon": "⤼",
                 "activityTitle": "Skipped",
-                "activitySubtitle": str(self.workflow["sha"].commit.author.date),
+                "activitySubtitle": self.convert_to_ist(str(self.workflow["sha"].commit.author.date)),
                 "activityImage": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/skipped.png",
                 "colour": "Default"
             },
@@ -51,7 +60,7 @@ class GitHubWorkflow:
                 "id": "unknown",
                 "icon": "?",
                 "activityTitle": "No job context has been provided",
-                "activitySubtitle": str(self.workflow["sha"].commit.author.date),
+                "activitySubtitle": self.convert_to_ist(str(self.workflow["sha"].commit.author.date)),
                 "activityImage": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/unknown.png",
                 "colour": "Default"
             }
