@@ -97,7 +97,7 @@ class NotificationCard:
         self.webhook_url = os.getenv("MS_TEAMS_WEBHOOK_URL")
         self.release_tag = os.getenv("GITHUB_REF")
         self.rootPath = os.getenv("GITHUB_WORKSPACE")
-        self.note_path = os.getenv("realease_note_path", "Release-Notes.txt")
+        self.note_path = os.getenv("release_note_path", "Release-Notes.txt")
         self.repo_url = f"https://github.com/{os.getenv('GITHUB_REPOSITORY')}/tree/{self.release_tag.split('/')[-1]}"
         self.repo_name = os.getenv("GITHUB_REPOSITORY").split('/')[-1]
         self.mobile_os = os.getenv("mobile_os")
@@ -105,13 +105,16 @@ class NotificationCard:
         self.version_code = os.getenv("version_code")
         self.play_console_url = os.getenv("play_console_url")
         self.testflight_url = os.getenv("testflight_url")
-        self.mode = "api" if self.repo_name == "checkpoint-api" else "mobile" if self.repo_name == "checkpoint-mobile-app" else None
+        self.allure_report_url = os.getenv("allure_report_url")
+        self.apk_name = os.getenv("apk_name")
+        self.mode = "api" if self.repo_name == "checkpoint-api" else "mobile" if self.repo_name == "checkpoint-mobile-app" else "appium" if self.repo_name == "qrt-mobile-automation" else None
 
     def send_notification(self, result_status):
         card = pyadaptivecard.AdaptiveCard(self.webhook_url)
         title_text = (
             f"Realtime Release: {self.release_tag}" if self.mode == "api"
             else f"Realtime {self.mobile_os} release" if self.mode == "mobile"
+            else f"Realtime Apk Testing" if self.mode == "appium" 
             else "Unknown release mode"
         )
         card.title(f"{title_text}")
@@ -123,7 +126,14 @@ class NotificationCard:
         if result_status["status"]["id"] == "success":
             card.addSection(self._create_release_notes_section())
 
-        url = result_status["work"].html_url if self.mode == "api" else self.play_console_url if self.mobile_os.lower() == "android" else self.testflight_url
+        # url = result_status["work"].html_url if self.mode == "api" else self.play_console_url if self.mobile_os.lower() == "android" else self.testflight_url
+        url = (
+            result_status["work"].html_url if self.mode == "api"
+            else self.allure_report_url if self.mode == "appium"
+            else self.play_console_url if (self.mobile_os and self.mobile_os.lower() == "android")
+            else self.testflight_url if (self.mobile_os and self.mobile_os.lower() == "ios")
+            else None
+        )
         card.addSection(self._create_button_section(url))
 
         return card
@@ -133,6 +143,7 @@ class NotificationCard:
         title_text = (
             f"Release Tag: {self.release_tag}" if self.mode == "api" 
             else f"Release version: {self.version_name}({self.version_code})" if self.mode == "mobile"
+            else f"Apk: {self.apk_name}" if self.mode == "appium"
             else "Unknown release code"
         )    
         section.activityTitle(f"{title_text}")
@@ -168,6 +179,7 @@ class NotificationCard:
             "Deployment Logs" if self.mode == "api" else
             "Google Play console" if self.mode == "mobile" and self.mobile_os.lower() == "android" else
             "Testflight" if self.mode == "mobile" and self.mobile_os.lower() == "ios" else
+            "Appium Report" if self.mode == "appium" else
             None,
             deployment_logs_url
         )
@@ -184,3 +196,5 @@ def check_result():
         return notification.send_notification(result_status)
     elif result_status["status"]["id"] == "failure":
         return notification.send_notification(result_status)
+
+
