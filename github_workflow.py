@@ -4,6 +4,7 @@ from github import Github, Auth
 from typing import List, Dict
 import pytz
 from datetime import datetime
+import json
 
 class GitHubWorkflow:
     def __init__(self):
@@ -109,6 +110,23 @@ class NotificationCard:
         self.apk_name = os.getenv("apk_name")
         self.mode = "api" if self.repo_name == "checkpoint-api" else "mobile" if self.repo_name == "checkpoint-mobile-app" else "appium" if self.repo_name == "qrt-mobile-automation" else None
 
+    def send_raw_text(self, raw_text):
+        if not raw_text:
+            print("⚠️ raw_text is empty or None — skipping send_raw_text()")
+            return None
+
+        try:
+            payload = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
+            print("\n======= Sending raw JSON payload to Teams =======")
+            print(json.dumps(payload, indent=4))
+            print("=================================================\n")
+            response = requests.post(self.webhook_url, json=payload)
+            print(f"✅ Teams Response: {response.status_code} {response.text}")
+            return response
+        except Exception as e:
+            print(f"⚠️ Failed to send raw JSON to Teams: {e}")
+            return None
+
     def send_notification(self, result_status):
         card = pyadaptivecard.AdaptiveCard(self.webhook_url)
         title_text = (
@@ -192,9 +210,12 @@ def check_result():
     result_status = workflow.get_workflow()
     notification = NotificationCard()
 
-    if result_status["status"]["id"] == "success":
-        return notification.send_notification(result_status)
-    elif result_status["status"]["id"] == "failure":
-        return notification.send_notification(result_status)
+    if raw_text:
+        print("Detected raw_text — sending raw payload instead of generated card.")
+        return notification.send_raw_text(raw_text)
+    else:
+        print("raw_text not provided — sending structured Adaptive Card.")
+        if result_status["status"]["id"] in ["success", "failure"]:
+            return notification.send_notification(result_status)
 
 
