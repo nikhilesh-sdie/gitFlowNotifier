@@ -12,13 +12,19 @@ def main():
     # Step 3: Determine the status and prepare the notification
     notification = NotificationCard()
     result_status = workflow.get_workflow()
- 
-    # Step 4: Send the notification based on the workflow status
-    if result_status["status"]["id"] == "success":
-        card = notification.send_notification(result_status)
-        print("Success Notification Card Generated")
-    else: 
-        card = notification.send_notification(result_status)
+
+    # Step 4: Check if raw_text is provided
+    raw_text = os.getenv("raw_text")
+
+    if raw_text:
+        print("Detected raw_text — sending raw payload instead of generated card.")
+        card = notification.send_raw_text(raw_text)
+    else:
+        print("raw_text not provided — sending structured Adaptive Card.")
+        if result_status["status"]["id"] in ["success", "failure"]:
+            card = notification.send_notification(result_status)
+        else:
+            card = notification.send_notification(result_status)
         print(f"{result_status['status']['id']} Notification Card Generated")
     
     # Step 6: (Optional) Display or send the generated card

@@ -202,20 +202,3 @@ class NotificationCard:
             deployment_logs_url
         )
         return section
-
-
-def check_result():
-    workflow = GitHubWorkflow()
-
-    result_status = workflow.get_workflow()
-    notification = NotificationCard()
-
-    if raw_text:
-        print("Detected raw_text — sending raw payload instead of generated card.")
-        return notification.send_raw_text(raw_text)
-    else:
-        print("raw_text not provided — sending structured Adaptive Card.")
-        if result_status["status"]["id"] in ["success", "failure"]:
-            return notification.send_notification(result_status)
-
-
