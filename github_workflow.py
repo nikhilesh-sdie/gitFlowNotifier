@@ -109,7 +109,7 @@ class NotificationCard:
         self.allure_report_url = os.getenv("allure_report_url")
         self.apk_name = os.getenv("apk_name")
         self.mode = "api" if self.repo_name == "checkpoint-api" else "mobile" if self.repo_name == "checkpoint-mobile-app" else "appium" if self.repo_name == "qrt-mobile-automation" else None
-
+        self.raw_text = os.getenv("raw_text", "").strip()
     def send_raw_text(self, raw_text):
         if not raw_text:
             print("⚠️ raw_text is empty or None — skipping send_raw_text()")
