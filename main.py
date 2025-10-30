@@ -14,7 +14,7 @@ def main():
     result_status = workflow.get_workflow()
 
     # Step 4: Check if raw_text is provided
-    raw_text = os.getenv("raw_text")
+    raw_text = os.getenv("RAW_TEXT")
 
     if raw_text:
         print("Detected raw_text — sending raw payload instead of generated card.")
