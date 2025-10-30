@@ -5,6 +5,7 @@ from typing import List, Dict
 import pytz
 from datetime import datetime
 import json
+import requests
 
 class GitHubWorkflow:
     def __init__(self):
