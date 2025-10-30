@@ -111,6 +111,7 @@ class NotificationCard:
         self.apk_name = os.getenv("apk_name")
         self.mode = "api" if self.repo_name == "checkpoint-api" else "mobile" if self.repo_name == "checkpoint-mobile-app" else "appium" if self.repo_name == "qrt-mobile-automation" else None
         self.raw_text = os.getenv("RAW_TEXT", "").strip()
+        
     def send_raw_text(self, raw_text):
         if not raw_text:
             print("⚠️ raw_text is empty or None — skipping send_raw_text()")
@@ -118,12 +119,36 @@ class NotificationCard:
 
         try:
             payload = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
-            print("\n======= Sending raw JSON payload to Teams =======")
-            print(json.dumps(payload, indent=4))
-            print("=================================================\n")
-            response = requests.post(self.webhook_url, json=payload)
-            print(f"✅ Teams Response: {response.status_code} {response.text}")
-            return response
+            job_status = os.getenv("job_status", "unknown").lower()
+            status_map = {
+                "success": {"icon": "✓", "image": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/success.png"},
+                "failure": {"icon": "✗", "image": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/failure.png"},
+                "cancelled": {"icon": "⦻", "image": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/cancelled.png"},
+                "skipped": {"icon": "⤼", "image": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/skipped.png"},
+                "unknown": {"icon": "?", "image": "https://raw.githubusercontent.com/nikhilesh-sdie/gitFlowNotifier/main/icons/unknown.png"}
+            }
+
+            selected = status_map.get(job_status, status_map["unknown"])
+            status_with_icon = f"{job_status.capitalize()} {selected['icon']}"
+
+            # 🔸 Safely replace Image URL and Status text in JSON
+            try:
+                payload["attachments"][0]["content"]["body"][1]["items"][0]["columns"][0]["items"][0]["url"] = selected["image"]
+                payload["attachments"][0]["content"]["body"][2]["items"][0]["columns"][1]["items"][1]["text"] = status_with_icon
+            except Exception as json_err:
+                print(f"⚠️ Could not update JSON fields: {json_err}")
+
+            print("\n======= Prepared raw JSON payload for Teams =======")
+            dry_run = os.getenv("dry_run", "false").lower() == "true"
+            if dry_run:
+                  # Display the JSON representation of the adaptive card.
+                print(json.dumps(payload, separators=(",", ":")))  # Minified format
+                print("🧪 Dry run mode — skipping actual send to Teams.")
+                return None
+            else:
+                response = requests.post(self.webhook_url, json=payload)
+                print(f"✅ Teams Response: {response.status_code} {response.text}")
+                return response
         except Exception as e:
             print(f"⚠️ Failed to send raw JSON to Teams: {e}")
             return None
