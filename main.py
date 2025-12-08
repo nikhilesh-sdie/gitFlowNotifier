@@ -27,13 +27,13 @@ def main():
             card = notification.send_notification(result_status)
         print(f"{result_status['status']['id']} Notification Card Generated")
     
-    # Step 6: (Optional) Display or send the generated card
-    dry_run = os.getenv("dry_run", "false").lower() == "true"
-
-    if dry_run:
-        card.printme()  # Display the JSON representation of the adaptive card.
-    else:
-        card.send()  # Send the card.
+        # Step 6: (Optional) Display or send the generated card
+        dry_run = os.getenv("dry_run", "false").lower() == "true"
+    
+        if dry_run:
+            card.printme()  # Display the JSON representation of the adaptive card.
+        else:
+            card.send()  # Send the card.
 
 if __name__ == "__main__":
     main()
